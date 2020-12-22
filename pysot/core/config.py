@@ -198,6 +198,18 @@ __C.ADJUST.KWARGS = CN(new_allowed=True)
 __C.ADJUST.TYPE = "AdjustAllLayer"
 
 # ------------------------------------------------------------------------ #
+# Transformer options
+# ------------------------------------------------------------------------ #
+__C.TRANSFORMER = CN()
+
+# RPN type
+__C.TRANSFORMER.TYPE = 'v1'
+__C.TRANSFORMER.TRANSFORMER = False
+
+__C.TRANSFORMER.KWARGS = CN(new_allowed=True)
+
+
+# ------------------------------------------------------------------------ #
 # RPN options
 # ------------------------------------------------------------------------ #
 __C.RPN = CN()
