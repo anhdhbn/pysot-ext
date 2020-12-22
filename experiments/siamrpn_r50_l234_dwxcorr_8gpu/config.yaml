@@ -66,10 +66,10 @@ TRAIN:
 
 DATASET:
     NAMES: 
-    - 'VID'
-    - 'YOUTUBEBB'
+    # - 'VID'
+    # - 'YOUTUBEBB'
     - 'COCO'
-    - 'DET'
+    # - 'DET'
 
     TEMPLATE:
         SHIFT: 4
