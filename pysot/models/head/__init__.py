@@ -39,4 +39,4 @@ def get_refine_head(name):
     return REFINE[name]()
 
 def get_tr_head(name, **kwargs):
-    return TRANSFORMER[name]()
+    return TRANSFORMER[name](**kwargs)

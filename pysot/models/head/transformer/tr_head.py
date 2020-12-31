@@ -35,9 +35,16 @@ class MLP(nn.Module):
         return x
 
 class SiamTr(nn.Module):
-    def __init__(self, hidden_dims=256, num_head = 4, num_encoder_layer=4, 
-    num_decoder_layer=4, dim_feed_forward=512, dropout=.1, num_query=4):
+    def __init__(self, hidden_dims=512, num_head = 8, num_encoder_layer=6, 
+    num_decoder_layer=6, dim_feed_forward=2048, dropout=.1, num_query=10):
         super(SiamTr, self).__init__()
+        print("hidden_dims", hidden_dims)
+        print("num_head", num_head)
+        print("num_encoder_layer", num_encoder_layer)
+        print("num_decoder_layer", num_decoder_layer)
+        print("dim_feed_forward", dim_feed_forward)
+        print("num_query", num_query)
+        exit(0)
         self.extractor = Extractor(hidden_dims=hidden_dims)
         self.transformer = Transformer(hidden_dims, num_head, num_encoder_layer, num_decoder_layer,
                                        dim_feed_forward, dropout)
