@@ -64,6 +64,7 @@ class AnchorTarget:
             overlap = np.zeros((anchor_num, size, size), dtype=np.float32)
             return cls, delta, delta_weight, overlap
 
+        # anchor dc sinh ra khi cho biet ratio ..datetime A combination of a date and a time. Attributes: ()
         anchor_box = self.anchors.all_anchors[0]
         anchor_center = self.anchors.all_anchors[1]
         x1, y1, x2, y2 = anchor_box[0], anchor_box[1], \
@@ -71,13 +72,16 @@ class AnchorTarget:
         cx, cy, w, h = anchor_center[0], anchor_center[1], \
             anchor_center[2], anchor_center[3]
 
+        # tcx target center x
+        # delta la anchor da (0, 1)
+
         delta[0] = (tcx - cx) / w
         delta[1] = (tcy - cy) / h
         delta[2] = np.log(tw / w)
         delta[3] = np.log(th / h)
 
         overlap = IoU([x1, y1, x2, y2], target)
-
+        
         pos = np.where(overlap > cfg.TRAIN.THR_HIGH)
         neg = np.where(overlap < cfg.TRAIN.THR_LOW)
 
@@ -89,3 +93,37 @@ class AnchorTarget:
 
         cls[neg] = 0
         return cls, delta, delta_weight, overlap
+
+class TransformerTarget:
+    def __init__(self,):
+        self.anchors = Anchors(cfg.ANCHOR.STRIDE,
+                               cfg.ANCHOR.RATIOS,
+                               cfg.ANCHOR.SCALES)
+        self.anchors.generate_all_anchors(im_c=cfg.TRAIN.SEARCH_SIZE//2,
+                                          size=cfg.TRAIN.OUTPUT_SIZE)
+    def __call__(self, target, neg=False):
+        anchor_num = cfg.TRANSFORMER.KWARGS.num_query
+        num_decoder_layer = cfg.TRANSFORMER.KWARGS.num_decoder_layer
+        # -1 ignore 0 negative 1 positive
+        cls = np.array([1, 0])
+        delta = np.zeros((1, 4), dtype=np.float32)  
+        # if neg:
+        #     cls = np.array([0, 1])
+        #     return cls, delta
+        
+
+        tcx, tcy, tw, th = corner2center(target)
+
+        anchor_box = self.anchors.all_anchors[0]
+        anchor_center = self.anchors.all_anchors[1]
+        x1, y1, x2, y2 = anchor_box[0], anchor_box[1], \
+            anchor_box[2], anchor_box[3]
+        cx, cy, w, h = anchor_center[0], anchor_center[1], \
+            anchor_center[2], anchor_center[3]
+
+        first = (tcx - cx) / w
+        second = (tcy - cy) / h
+        third = np.log(tw / w)
+        fourth = np.log(th / h)
+        delta = np.array([first[0][0][0], second[0][0][0], third[0][0][0], fourth[0][0][0]])
+        return cls, delta

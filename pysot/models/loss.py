@@ -30,7 +30,7 @@ def select_cross_entropy_loss(pred, label):
 
 def weight_l1_loss(pred_loc, label_loc, loss_weight):
     b, _, sh, sw = pred_loc.size()
-    pred_loc = pred_loc.view(b, 4, -1, sh, sw)
+    pred_loc = pred_loc.view(b, 4, -1, sh, sw) # torch.Size([28, 4, 5, 25, 25])
     diff = (pred_loc - label_loc).abs()
     diff = diff.sum(dim=1).view(b, -1, sh, sw)
     loss = diff * loss_weight

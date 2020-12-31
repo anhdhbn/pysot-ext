@@ -94,7 +94,8 @@ def build_opt_lr(model, current_epoch=0):
         trainable_params += [{'params': model.neck.parameters(),
                               'lr': cfg.TRAIN.BASE_LR}]
     if cfg.TRANSFORMER.TRANSFORMER:
-        pass
+        trainable_params += [{'params': model.tr_head.parameters(),
+                            'lr': cfg.TRAIN.BASE_LR}]
     else:
         trainable_params += [{'params': model.rpn_head.parameters(),
                             'lr': cfg.TRAIN.BASE_LR}]
@@ -150,7 +151,10 @@ def log_grads(model, tb_writer, tb_index):
 
     tb_writer.add_scalar('grad/tot', tot_norm, tb_index)
     tb_writer.add_scalar('grad/feature', feature_norm, tb_index)
-    tb_writer.add_scalar('grad/rpn', rpn_norm, tb_index)
+    if cfg.TRANSFORMER.TRANSFORMER:
+        pass
+    else:
+        tb_writer.add_scalar('grad/rpn', rpn_norm, tb_index)
 
 
 def train(train_loader, model, optimizer, lr_scheduler, tb_writer):

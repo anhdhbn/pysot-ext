@@ -15,7 +15,7 @@ import numpy as np
 from torch.utils.data import Dataset
 
 from pysot.utils.bbox import center2corner, Center
-from pysot.datasets.anchor_target import AnchorTarget
+from pysot.datasets.anchor_target import AnchorTarget, TransformerTarget
 from pysot.datasets.augmentation import Augmentation
 from pysot.core.config import cfg
 
@@ -149,7 +149,7 @@ class TrkDataset(Dataset):
 
         # create anchor target
         self.anchor_target = AnchorTarget()
-
+        self.tr_target = TransformerTarget()
         # create sub dataset
         self.all_dataset = []
         start = 0
@@ -263,17 +263,27 @@ class TrkDataset(Dataset):
                                        search_box,
                                        cfg.TRAIN.SEARCH_SIZE,
                                        gray=gray)
-
-        # get labels
-        cls, delta, delta_weight, overlap = self.anchor_target(
-                bbox, cfg.TRAIN.OUTPUT_SIZE, neg)
         template = template.transpose((2, 0, 1)).astype(np.float32)
         search = search.transpose((2, 0, 1)).astype(np.float32)
-        return {
-                'template': template,
-                'search': search,
-                'label_cls': cls,
-                'label_loc': delta,
-                'label_loc_weight': delta_weight,
-                'bbox': np.array(bbox)
-                }
+        # get labels 
+        if cfg.TRANSFORMER.TRANSFORMER:
+            cls, delta = self.tr_target(bbox, neg)
+            return {
+                    'template': template,
+                    'search': search,
+                    'label_cls': cls,
+                    'label_loc': delta,
+                    'bbox': np.array(bbox)
+                    }
+        else:
+            cls, delta, delta_weight, overlap = self.anchor_target(
+                    bbox, cfg.TRAIN.OUTPUT_SIZE, neg)
+            
+            return {
+                    'template': template,
+                    'search': search,
+                    'label_cls': cls,
+                    'label_loc': delta,
+                    'label_loc_weight': delta_weight,
+                    'bbox': np.array(bbox)
+                    }
