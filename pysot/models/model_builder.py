@@ -44,12 +44,15 @@ class ModelBuilder(nn.Module):
                     self.refine_head = get_refine_head(cfg.REFINE.TYPE)
 
     def template(self, z):
-        zf = self.backbone(z)
-        if cfg.MASK.MASK:
-            zf = zf[-1]
-        if cfg.ADJUST.ADJUST:
-            zf = self.neck(zf)
-        self.zf = zf
+        if cfg.TRANSFORMER.TRANSFORMER:
+            pass
+        else:
+            zf = self.backbone(z)
+            if cfg.MASK.MASK:
+                zf = zf[-1]
+            if cfg.ADJUST.ADJUST:
+                zf = self.neck(zf)
+            self.zf = zf
 
     def track(self, x):
         if cfg.TRANSFORMER.TRANSFORMER:
