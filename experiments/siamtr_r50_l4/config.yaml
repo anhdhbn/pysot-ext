@@ -20,7 +20,7 @@ TRANSFORMER:
     TYPE: 'v1'
     KWARGS:
         hidden_dims: 256
-        num_head: 6
+        num_head: 4
         num_encoder_layer: 4
         num_decoder_layer: 4
         dim_feed_forward: 256

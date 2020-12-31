@@ -38,31 +38,27 @@ class SiamTr(nn.Module):
     def __init__(self, hidden_dims=512, num_head = 8, num_encoder_layer=6, 
     num_decoder_layer=6, dim_feed_forward=2048, dropout=.1, num_query=10):
         super(SiamTr, self).__init__()
-        print("hidden_dims", hidden_dims)
-        print("num_head", num_head)
-        print("num_encoder_layer", num_encoder_layer)
-        print("num_decoder_layer", num_decoder_layer)
-        print("dim_feed_forward", dim_feed_forward)
-        print("num_query", num_query)
-        exit(0)
         self.extractor = Extractor(hidden_dims=hidden_dims)
         self.transformer = Transformer(hidden_dims, num_head, num_encoder_layer, num_decoder_layer,
                                        dim_feed_forward, dropout)
 
         self.query_embed = nn.Embedding(num_query, hidden_dims)
-        self.class_embed = nn.Linear(hidden_dims, 2)
-        self.bbox_embed = MLP(hidden_dims, hidden_dims, 4, 3)
+        self.class_embed = nn.Linear(num_decoder_layer * num_decoder_layer * hidden_dims, 2)
+        self.bbox_embed = nn.Linear(num_decoder_layer * num_decoder_layer * hidden_dims, 4)
+        # self.bbox_embed = MLP(hidden_dims, hidden_dims, 4, 3)
 
     def forward(self, template: Tensor, search: Tensor):
         features, (pos, mask) = self.extractor(template, search)
 
         out = self.transformer(features, mask, self.query_embed.weight, pos)
-        # print(out.shape)
+        N = out.shape[0]
+        out = out.view((N, -1))
 
-        outputs_class = self.class_embed(out)
+        outputs_class = self.class_embed(out).sigmoid()
         outputs_coord = self.bbox_embed(out)
         # print(outputs_class.shape, outputs_coord.shape)
         # print(outputs_class[0], outputs_coord[0])
+        # exit(0)
         return outputs_class, outputs_coord
 
         # return {'class': outputs_class[-1],

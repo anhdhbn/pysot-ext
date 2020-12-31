@@ -21,7 +21,7 @@ class ModelBuilder(nn.Module):
         # build backbone
         self.backbone = get_backbone(cfg.BACKBONE.TYPE,
                                      **cfg.BACKBONE.KWARGS)
-
+        self.tr_cls_loss = nn.BCELoss()
         # build adjust layer
         if cfg.ADJUST.ADJUST:
             self.neck = get_neck(cfg.ADJUST.TYPE,
@@ -103,7 +103,7 @@ class ModelBuilder(nn.Module):
         """
         template = data['template'].cuda() # 28, 2, 127, 127: batch 28, color 3, size 127x127
         search = data['search'].cuda()
-        label_cls = data['label_cls'].cuda() # torch.Size([28, 5, 25, 25])
+        label_cls = data['label_cls'].type(torch.FloatTensor).cuda() # torch.Size([28, 5, 25, 25])
         label_loc = data['label_loc'].cuda()
         
         # get feature
@@ -115,12 +115,21 @@ class ModelBuilder(nn.Module):
                 zf = self.neck(zf)
                 xf = self.neck(xf)
             cls, loc = self.tr_head(zf, xf)
-            _, query, _ = loc.shape
+            # _, query, _ = loc.shape
             # print("loc", loc.shape)
             # print("loc_t", label_loc.shape)
-            loc_loss = F.mse_loss(loc, label_loc.unsqueeze(1).repeat(1, query, 1))
+            # print(label_cls)
+            
+            loc_loss = F.mse_loss(loc, label_loc)
+            # self.tr_cls_loss = nn.BCELoss()
+            cls_loss = self.tr_cls_loss(cls, label_cls)
+            
             outputs = {}
-            outputs['total_loss'] = cfg.TRAIN.LOC_WEIGHT * loc_loss
+            outputs['loc_loss'] = loc_loss
+            outputs['cls_loss'] = cls_loss
+            outputs['total_loss'] = cfg.TRAIN.LOC_WEIGHT * loc_loss + cfg.TRAIN.CLS_WEIGHT * cls_loss
+            # print(outputs)
+            # exit(0)
             # print(cls.view(-1).shape, label_cls.view(-1).shape)
             # loss = F.nll_loss(cls.view(-1), label_cls.view(-1))
             # print(loss.shape, loss)
@@ -135,6 +144,7 @@ class ModelBuilder(nn.Module):
                 zf = self.neck(zf)
                 xf = self.neck(xf)
             cls, loc = self.rpn_head(zf, xf)
+            
             # loc torch.Size([28, 20, 25, 25])
             # label_loc torch.Size([28, 4, 5, 25, 25])
             # label_loc_weight torch.Size([28, 5, 25, 25])

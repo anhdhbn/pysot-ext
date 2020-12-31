@@ -105,11 +105,11 @@ class TransformerTarget:
         anchor_num = cfg.TRANSFORMER.KWARGS.num_query
         num_decoder_layer = cfg.TRANSFORMER.KWARGS.num_decoder_layer
         # -1 ignore 0 negative 1 positive
-        cls = np.array([1, 0])
-        delta = np.zeros((1, 4), dtype=np.float32)  
-        # if neg:
-        #     cls = np.array([0, 1])
-        #     return cls, delta
+        cls = np.array([1, 0], dtype=np.float)
+        delta = np.zeros((4), dtype=np.float32)  
+        if neg:
+            cls = np.array([0, 1], dtype=np.float)
+            return cls, delta
         
 
         tcx, tcy, tw, th = corner2center(target)
@@ -125,5 +125,5 @@ class TransformerTarget:
         second = (tcy - cy) / h
         third = np.log(tw / w)
         fourth = np.log(th / h)
-        delta = np.array([first[0][0][0], second[0][0][0], third[0][0][0], fourth[0][0][0]])
+        delta = np.array([first[0][0][0], second[0][0][0], third[0][0][0], fourth[0][0][0]], dtype=np.float32)
         return cls, delta
