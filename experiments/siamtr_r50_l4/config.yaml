@@ -38,7 +38,7 @@ TRACK:
 #     CONTEXT_AMOUNT: 0.5
 
 TRAIN:
-    EPOCH: 4
+    EPOCH: 20
     START_EPOCH: 0
     BATCH_SIZE: 46
     BASE_LR: 0.005
@@ -54,7 +54,7 @@ TRAIN:
             end_lr: 0.0005
     LR_WARMUP:
         TYPE: 'step'
-        EPOCH: 3
+        EPOCH: 10
         KWARGS:
             start_lr: 0.001
             end_lr: 0.005
