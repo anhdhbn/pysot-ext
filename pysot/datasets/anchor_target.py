@@ -39,7 +39,7 @@ class AnchorTarget:
             return tuple(p[slt] for p in position), keep_num
 
         tcx, tcy, tw, th = corner2center(target)
-
+        # 125.46613458311141 125.46613458311141 71.39393890439626 60.505337643758054
         if neg:
             # l = size // 2 - 3
             # r = size // 2 + 3 + 1
@@ -72,7 +72,7 @@ class AnchorTarget:
         cx, cy, w, h = anchor_center[0], anchor_center[1], \
             anchor_center[2], anchor_center[3]
 
-        # tcx target center x
+        # tcx target center x 
         # delta la anchor da (0, 1)
 
         delta[0] = (tcx - cx) / w
@@ -101,7 +101,7 @@ class TransformerTarget:
                                cfg.ANCHOR.SCALES)
         self.anchors.generate_all_anchors(im_c=cfg.TRAIN.SEARCH_SIZE//2,
                                           size=cfg.TRAIN.OUTPUT_SIZE)
-    def __call__(self, target, neg=False):
+    def __call__(self, target, shape, neg=False):
         anchor_num = cfg.TRANSFORMER.KWARGS.num_query
         num_decoder_layer = cfg.TRANSFORMER.KWARGS.num_decoder_layer
         # -1 ignore 0 negative 1 positive
@@ -111,19 +111,29 @@ class TransformerTarget:
             cls = np.array([0, 1], dtype=np.float)
             return cls, delta
         
-
+        h, w = shape
+        x1, y1, x2, y2 = target
         tcx, tcy, tw, th = corner2center(target)
 
-        anchor_box = self.anchors.all_anchors[0]
-        anchor_center = self.anchors.all_anchors[1]
-        x1, y1, x2, y2 = anchor_box[0], anchor_box[1], \
-            anchor_box[2], anchor_box[3]
-        cx, cy, w, h = anchor_center[0], anchor_center[1], \
-            anchor_center[2], anchor_center[3]
+        # print(tcx, tcy, tw, th)
 
-        first = (tcx - cx) / w
-        second = (tcy - cy) / h
-        third = np.log(tw / w)
-        fourth = np.log(th / h)
-        delta = np.array([first[0][0][0], second[0][0][0], third[0][0][0], fourth[0][0][0]], dtype=np.float32)
+        startX = float(x1) / w
+        startY = float(y1) / h
+        endX = float(x2) / w
+        endY = float(y2) / h
+
+        # exit(0)
+        # anchor_box = self.anchors.all_anchors[0]
+        # anchor_center = self.anchors.all_anchors[1]
+        # x1, y1, x2, y2 = anchor_box[0], anchor_box[1], \
+        #     anchor_box[2], anchor_box[3]
+        # cx, cy, w, h = anchor_center[0], anchor_center[1], \
+        #     anchor_center[2], anchor_center[3]
+
+        # first = (tcx - cx) / w
+        # second = (tcy - cy) / h
+        # third = np.log(tw / w)
+        # fourth = np.log(th / h)   
+        # delta = np.array([first[0][0][0], second[0][0][0], third[0][0][0], fourth[0][0][0]], dtype=np.float32)
+        delta = np.array([startX, startY, endX, endY], dtype=np.float32)
         return cls, delta

@@ -14,7 +14,7 @@ from pysot.utils.bbox import corner2center, center2corner
 
 class Anchors:
     """
-    This class generate anchors.
+    This class generate anchors.,
     """
     def __init__(self, stride, ratios, scales, image_center=0, size=0):
         self.stride = stride

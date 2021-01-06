@@ -53,6 +53,10 @@ __C.TRAIN.LOG_DIR = './logs'
 
 __C.TRAIN.SNAPSHOT_DIR = './snapshot'
 
+__C.TRAIN.TEST_SNAPSHOT_DIR = './test/snapshot'
+
+__C.TRAIN.TEST_IMMEDIATELY = False
+
 __C.TRAIN.EPOCH = 20
 
 __C.TRAIN.START_EPOCH = 0

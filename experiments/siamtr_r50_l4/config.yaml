@@ -27,24 +27,8 @@ TRANSFORMER:
         dropout: 0.1
         num_query: 4
 
-# RPN:
-#     TYPE: 'MultiRPN'
-#     KWARGS:
-#         anchor_num: 5
-#         in_channels: [256, 256, 256]
-#         weighted: true
-
-# MASK:
-#     MASK: false
-
-# ANCHOR:
-#     STRIDE: 8
-#     RATIOS: [0.33, 0.5, 1, 2, 3]
-#     SCALES: [8]
-#     ANCHOR_NUM: 5
-
-# TRACK:
-#     TYPE: 'SiamRPNTracker'
+TRACK:
+    TYPE: 'SiamTrTracker'
 #     PENALTY_K: 0.04
 #     WINDOW_INFLUENCE: 0.44
 #     LR: 0.33
@@ -54,13 +38,14 @@ TRANSFORMER:
 #     CONTEXT_AMOUNT: 0.5
 
 TRAIN:
-    EPOCH: 10
+    EPOCH: 4
     START_EPOCH: 0
     BATCH_SIZE: 46
     BASE_LR: 0.005
     CLS_WEIGHT: 1.0
     LOC_WEIGHT: 1.2
     RESUME: ''
+    TEST_IMMEDIATELY: true
 
     LR:
         TYPE: 'log'
@@ -69,7 +54,7 @@ TRAIN:
             end_lr: 0.0005
     LR_WARMUP:
         TYPE: 'step'
-        EPOCH: 5
+        EPOCH: 3
         KWARGS:
             start_lr: 0.001
             end_lr: 0.005

@@ -32,6 +32,8 @@ from pysot.models.model_builder import ModelBuilder
 from pysot.datasets.dataset import TrkDataset
 from pysot.core.config import cfg
 
+from pysot.utils.test_immediately import test_immediately
+
 
 logger = logging.getLogger('global')
 parser = argparse.ArgumentParser(description='siamrpn tracking')
@@ -178,16 +180,25 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
     logger.info("model\n{}".format(describe(model.module)))
     end = time.time()
+
     for idx, data in enumerate(train_loader):
         if epoch != idx // num_per_epoch + start_epoch:
             epoch = idx // num_per_epoch + start_epoch
 
             if get_rank() == 0:
+                snapshot_path = cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e%d.pth' % (epoch)
                 torch.save(
                         {'epoch': epoch,
                          'state_dict': model.module.state_dict(),
                          'optimizer': optimizer.state_dict()},
-                        cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e%d.pth' % (epoch))
+                        snapshot_path)
+                if cfg.TRAIN.TEST_IMMEDIATELY:
+                    test_path = cfg.TRAIN.TEST_SNAPSHOT_DIR + 'e%d' % (epoch)
+                    if not os.path.exists(test_path):
+                        os.makedirs(test_path)
+                    model.train(False)
+                    test_immediately(epoch=epoch, snapshot=snapshot_path, test_path=test_path)
+                    model.train(True)
 
             if epoch == cfg.TRAIN.EPOCH:
                 return

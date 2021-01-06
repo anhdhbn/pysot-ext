@@ -45,7 +45,10 @@ class ModelBuilder(nn.Module):
 
     def template(self, z):
         if cfg.TRANSFORMER.TRANSFORMER:
-            pass
+            zf = self.backbone(z)
+            if cfg.ADJUST.ADJUST:
+                zf = self.neck(zf)
+            self.zf = zf
         else:
             zf = self.backbone(z)
             if cfg.MASK.MASK:
@@ -59,7 +62,6 @@ class ModelBuilder(nn.Module):
             xf = self.backbone(x)
             if cfg.ADJUST.ADJUST:
                 xf = self.neck(xf)
-            # pass
             cls, loc = self.tr_head(self.zf, xf)
             return {
                     'cls': cls,
@@ -121,7 +123,6 @@ class ModelBuilder(nn.Module):
             # print(label_cls)
             
             loc_loss = F.mse_loss(loc, label_loc)
-            # self.tr_cls_loss = nn.BCELoss()
             cls_loss = self.tr_cls_loss(cls, label_cls)
             
             outputs = {}
