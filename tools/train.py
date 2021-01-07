@@ -226,7 +226,7 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
         outputs = model(data)
         loss = outputs['total_loss']
-
+        
         if is_valid_number(loss.data.item()):
             optimizer.zero_grad()
             loss.backward()
@@ -248,7 +248,7 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
         average_meter.update(**batch_info)
 
-        if rank == 0:
+        if rank == 0 and loss < 0.1:
             snapshot_path = cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e%d_%d.pth' % (epoch, idx)
             torch.save(
                     {'epoch': epoch,
@@ -262,7 +262,7 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
                 model.train(False)
                 test_snapshot(epoch=epoch, snapshot=snapshot_path, test_path=test_path)
                 model.train(True)
-
+                
         if rank == 0:
             for k, v in batch_info.items():
                 tb_writer.add_scalar(k, v, tb_idx)
