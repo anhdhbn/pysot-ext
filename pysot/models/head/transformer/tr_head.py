@@ -55,7 +55,7 @@ class SiamTr(nn.Module):
         out = out.view((N, -1))
 
         outputs_class = self.class_embed(out).sigmoid()
-        outputs_coord = self.bbox_embed(out).sigmoid()
+        outputs_coord = self.bbox_embed(out)
         # print(outputs_class.shape, outputs_coord.shape)
         # print(outputs_class[0], outputs_coord[0])
         # exit(0)
