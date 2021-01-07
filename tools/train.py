@@ -32,7 +32,7 @@ from pysot.models.model_builder import ModelBuilder
 from pysot.datasets.dataset import TrkDataset
 from pysot.core.config import cfg
 
-from pysot.utils.test_immediately import test_immediately
+from pysot.utils.test_snapshot import test_snapshot
 
 
 logger = logging.getLogger('global')
@@ -180,14 +180,12 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
     logger.info("model\n{}".format(describe(model.module)))
     end = time.time()
-    snapshot_path = cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e1.pth'
-    test_path = cfg.TRAIN.TEST_SNAPSHOT_DIR + 'e1'
-    test_immediately(epoch=1, snapshot=snapshot_path, test_path=test_path)
+
     for idx, data in enumerate(train_loader):
         if epoch != idx // num_per_epoch + start_epoch:
             epoch = idx // num_per_epoch + start_epoch
 
-            if get_rank() == 0:
+            if rank == 0:
                 snapshot_path = cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e%d.pth' % (epoch)
                 torch.save(
                         {'epoch': epoch,
@@ -195,11 +193,11 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
                          'optimizer': optimizer.state_dict()},
                         snapshot_path)
                 if cfg.TRAIN.TEST_IMMEDIATELY:
-                    test_path = cfg.TRAIN.TEST_SNAPSHOT_DIR + 'e%d' % (epoch)
+                    test_path = cfg.TRAIN.TEST_SNAPSHOT_DIR + '_e%d' % (epoch)
                     if not os.path.exists(test_path):
                         os.makedirs(test_path)
                     model.train(False)
-                    test_immediately(epoch=epoch, snapshot=snapshot_path, test_path=test_path)
+                    test_snapshot(epoch=epoch, snapshot=snapshot_path, test_path=test_path)
                     model.train(True)
 
             if epoch == cfg.TRAIN.EPOCH:
@@ -249,6 +247,21 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
             batch_info[k] = average_reduce(v.data.item())
 
         average_meter.update(**batch_info)
+
+        if rank == 0:
+            snapshot_path = cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e%d_%d.pth' % (epoch, idx)
+            torch.save(
+                    {'epoch': epoch,
+                        'state_dict': model.module.state_dict(),
+                        'optimizer': optimizer.state_dict()},
+                    snapshot_path)
+            if cfg.TRAIN.TEST_IMMEDIATELY:
+                test_path = cfg.TRAIN.TEST_SNAPSHOT_DIR + '_e%d_%d' % (epoch, idx)
+                if not os.path.exists(test_path):
+                    os.makedirs(test_path)
+                model.train(False)
+                test_snapshot(epoch=epoch, snapshot=snapshot_path, test_path=test_path)
+                model.train(True)
 
         if rank == 0:
             for k, v in batch_info.items():
