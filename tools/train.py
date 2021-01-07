@@ -180,7 +180,9 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
     logger.info("model\n{}".format(describe(model.module)))
     end = time.time()
-
+    snapshot_path = cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e1.pth'
+    test_path = cfg.TRAIN.TEST_SNAPSHOT_DIR + 'e1'
+    test_immediately(epoch=1, snapshot=snapshot_path, test_path=test_path)
     for idx, data in enumerate(train_loader):
         if epoch != idx // num_per_epoch + start_epoch:
             epoch = idx // num_per_epoch + start_epoch

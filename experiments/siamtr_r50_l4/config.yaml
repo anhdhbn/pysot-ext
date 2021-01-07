@@ -46,6 +46,7 @@ TRAIN:
     LOC_WEIGHT: 1.2
     RESUME: ''
     TEST_IMMEDIATELY: true
+    # SNAPSHOT_DIR: './snapshot'
 
     LR:
         TYPE: 'log'

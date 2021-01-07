@@ -15,10 +15,11 @@ def test_immediately(epoch:int, snapshot:str, test_path:str):
     model.eval().to(torch.device('cpu'))
     tracker = build_tracker(model)
     
-    # root = cfg.DATASET.COCO.ROOT
-    root = "/home/anhdh/projects/pysot2"
-    dataset = "training_dataset/coco/crop511/val2017"
-    folder = glob.glob(f"{root}/{dataset}/**")[1]
+    root = cfg.DATASET.COCO.ROOT
+    cur_path = os.path.dirname(os.path.realpath(__file__))
+    root = os.path.join(cur_path, '../../', root)
+    dataset = os.path.join(root, "val2017")
+    folder = glob.glob(f"{dataset}/**")[1]
     zs = glob.glob(f"{folder}/*.z.jpg")
     xs = glob.glob(f"{folder}/*.x.jpg")
 
