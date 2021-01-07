@@ -248,21 +248,21 @@ def train(train_loader, model, optimizer, lr_scheduler, tb_writer):
 
         average_meter.update(**batch_info)
 
-        if rank == 0 and loss < 0.1:
-            snapshot_path = cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e%d_%d.pth' % (epoch, idx)
-            torch.save(
-                    {'epoch': epoch,
-                        'state_dict': model.module.state_dict(),
-                        'optimizer': optimizer.state_dict()},
-                    snapshot_path)
-            if cfg.TRAIN.TEST_IMMEDIATELY:
-                test_path = cfg.TRAIN.TEST_SNAPSHOT_DIR + '_e%d_%d' % (epoch, idx)
-                if not os.path.exists(test_path):
-                    os.makedirs(test_path)
-                model.train(False)
-                test_snapshot(epoch=epoch, snapshot=snapshot_path, test_path=test_path)
-                model.train(True)
-                
+        # if rank == 0 and loss < 0.1:
+        #     snapshot_path = cfg.TRAIN.SNAPSHOT_DIR+'/checkpoint_e%d_%d.pth' % (epoch, idx)
+        #     torch.save(
+        #             {'epoch': epoch,
+        #                 'state_dict': model.module.state_dict(),
+        #                 'optimizer': optimizer.state_dict()},
+        #             snapshot_path)
+        #     if cfg.TRAIN.TEST_IMMEDIATELY:
+        #         test_path = cfg.TRAIN.TEST_SNAPSHOT_DIR + '_e%d_%d' % (epoch, idx)
+        #         if not os.path.exists(test_path):
+        #             os.makedirs(test_path)
+        #         model.train(False)
+        #         test_snapshot(epoch=epoch, snapshot=snapshot_path, test_path=test_path)
+        #         model.train(True)
+
         if rank == 0:
             for k, v in batch_info.items():
                 tb_writer.add_scalar(k, v, tb_idx)

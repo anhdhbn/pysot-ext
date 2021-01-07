@@ -126,7 +126,7 @@ class ModelBuilder(nn.Module):
             mask = label_cls != torch.tensor([0, 1], dtype=torch.float).cuda()
             mask = torch.cat((mask, mask), 1)
             
-            loc_loss = F.l1_loss(loc[mask], label_loc[mask])
+            loc_loss = F.mse_loss(loc[mask], label_loc[mask])
             cls_loss = self.tr_cls_loss(cls, label_cls)
             
             outputs = {}
