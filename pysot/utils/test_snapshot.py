@@ -34,11 +34,10 @@ def test_snapshot(epoch:int, snapshot:str, test_path:str):
         x = cv2.imread(xs[i])
         tracker.init(z)
         cls, (x1, y1, x2, y2) = tracker.track(x)
-        img = cv2.imread(xs[i])
-        cv2.rectangle(img, (x1, y1), (x2, y2), (255,0,0), 2)
-        cv2.putText(img, 'Acc: ' + cls.astype('str'), (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+        cv2.rectangle(x, (x1, y1), (x2, y2), (255,0,0), 2)
+        cv2.putText(x, 'Acc: ' + cls.astype('str'), (x1, y1-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
         parent_dir = f"{test_path}/{os.path.basename(Path(zs[i]).parent)}"
         if not os.path.exists(parent_dir):
             os.makedirs(parent_dir)
-        cv2.imwrite(f"{parent_dir}/{os.path.basename(xs[i])}", img)
+        cv2.imwrite(f"{parent_dir}/{os.path.basename(xs[i])}", x)
         cv2.imwrite(f"{parent_dir}/{os.path.basename(zs[i])}", z)

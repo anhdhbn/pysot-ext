@@ -263,12 +263,14 @@ class TrkDataset(Dataset):
                                        search_box,
                                        cfg.TRAIN.SEARCH_SIZE,
                                        gray=gray)
+
+        new_shape = search.shape[:2]
         template = template.transpose((2, 0, 1)).astype(np.float32)
         search = search.transpose((2, 0, 1)).astype(np.float32)
 
         # get labels 
         if cfg.TRANSFORMER.TRANSFORMER:
-            cls, delta = self.tr_target(bbox,template_image.shape[:2], neg)
+            cls, delta = self.tr_target(bbox,new_shape, neg)
             return {
                     'template': template,
                     'search': search,

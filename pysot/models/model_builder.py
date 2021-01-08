@@ -117,27 +117,18 @@ class ModelBuilder(nn.Module):
                 zf = self.neck(zf)
                 xf = self.neck(xf)
             cls, loc = self.tr_head(zf, xf)
-            # _, query, _ = loc.shape
-            # print("loc", loc.shape)
-            # print("loc_t", label_loc.shape)
-            # print(label_cls)
 
             # ignore negative labels
             mask = label_cls != torch.tensor([0, 1], dtype=torch.float).cuda()
             mask = torch.cat((mask, mask), 1)
             
-            loc_loss = F.mse_loss(loc[mask], label_loc[mask])
+            loc_loss = F.l1_loss(loc[mask], label_loc[mask])
             cls_loss = self.tr_cls_loss(cls, label_cls)
-            
+
             outputs = {}
             outputs['loc_loss'] = loc_loss
             outputs['cls_loss'] = cls_loss
             outputs['total_loss'] = cfg.TRAIN.LOC_WEIGHT * loc_loss + cfg.TRAIN.CLS_WEIGHT * cls_loss
-            # print(outputs)
-            # exit(0)
-            # print(cls.view(-1).shape, label_cls.view(-1).shape)
-            # loss = F.nll_loss(cls.view(-1), label_cls.view(-1))
-            # print(loss.shape, loss)
             return outputs
         else:
             label_loc_weight = data['label_loc_weight'].cuda()
