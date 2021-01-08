@@ -47,20 +47,22 @@ class SiamTr(nn.Module):
         self.bbox_embed = nn.Linear(num_decoder_layer * num_decoder_layer * hidden_dims, 4)
         # self.bbox_embed = MLP(hidden_dims, hidden_dims, 4, 3)
 
-    def forward(self, template: Tensor, search: Tensor):
+    def forward(self, template: Tensor, search: Tensor) -> Tuple[Tensor, Tensor]:
+        """
+        :param x and y: a tuple containing:
+            a tensor of shape [batchSize , 2]
+            a tensor of shape [batchSize , 4]
+
+        :return: a tuple containing cls, loc
+        """
         features, (pos, mask) = self.extractor(template, search)
 
         out = self.transformer(features, mask, self.query_embed.weight, pos)
+
+        # convert out [batchSize, numQuery * numDecoderLayer, hiddenDims] => [batchSize, numQuery * numDecoderLayer * hiddenDims]
         N = out.shape[0]
         out = out.view((N, -1))
 
-        outputs_class = self.class_embed(out).sigmoid()
-        outputs_coord = self.bbox_embed(out).sigmoid()
-        # print(outputs_class.shape, outputs_coord.shape)
-        # print(outputs_class[0], outputs_coord[0])
-        # exit(0)
+        outputs_class = self.class_embed(out).sigmoid() # [batchSize , 2]
+        outputs_coord = self.bbox_embed(out).sigmoid()  # [batchSize , 4]
         return outputs_class, outputs_coord
-
-        # return {'class': outputs_class[-1],
-        #         'bbox': outputs_coord[-1],
-        #         'aux': [{'class': oc, 'bbox': ob} for oc, ob in zip(outputs_class[:-1], outputs_coord[:-1])]}

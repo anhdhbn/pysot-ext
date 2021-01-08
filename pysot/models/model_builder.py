@@ -13,7 +13,7 @@ from pysot.models.loss import select_cross_entropy_loss, weight_l1_loss
 from pysot.models.backbone import get_backbone
 from pysot.models.head import get_rpn_head, get_mask_head, get_refine_head, get_tr_head
 from pysot.models.neck import get_neck
-
+from pysot.models.head.transformer.criterion import SiamTrCriterion
 class ModelBuilder(nn.Module):
     def __init__(self):
         super(ModelBuilder, self).__init__()
@@ -21,7 +21,6 @@ class ModelBuilder(nn.Module):
         # build backbone
         self.backbone = get_backbone(cfg.BACKBONE.TYPE,
                                      **cfg.BACKBONE.KWARGS)
-        self.tr_cls_loss = nn.BCELoss()
         # build adjust layer
         if cfg.ADJUST.ADJUST:
             self.neck = get_neck(cfg.ADJUST.TYPE,
@@ -32,6 +31,7 @@ class ModelBuilder(nn.Module):
             assert(cfg.TRANSFORMER.KWARGS.hidden_dims == cfg.ADJUST.KWARGS.out_channels, "AdjustLayer out_channels = hidden_dims")
             self.tr_head = get_tr_head(cfg.TRANSFORMER.TYPE,
                                      **cfg.TRANSFORMER.KWARGS)
+            self.criterion = SiamTrCriterion(cfg.TRAIN.CLS_WEIGHT, cfg.TRAIN.LOC_WEIGHT, cfg.TRAIN.IOU_WEIGHT)
         else:
             self.rpn_head = get_rpn_head(cfg.RPN.TYPE,
                                      **cfg.RPN.KWARGS)
@@ -116,19 +116,9 @@ class ModelBuilder(nn.Module):
             if cfg.ADJUST.ADJUST:
                 zf = self.neck(zf)
                 xf = self.neck(xf)
-            cls, loc = self.tr_head(zf, xf)
+            output = self.tr_head(zf, xf)
 
-            # ignore negative labels
-            mask = label_cls != torch.tensor([0, 1], dtype=torch.float).cuda()
-            mask = torch.cat((mask, mask), 1)
-            
-            loc_loss = F.l1_loss(loc[mask], label_loc[mask])
-            cls_loss = self.tr_cls_loss(cls, label_cls)
-
-            outputs = {}
-            outputs['loc_loss'] = loc_loss
-            outputs['cls_loss'] = cls_loss
-            outputs['total_loss'] = cfg.TRAIN.LOC_WEIGHT * loc_loss + cfg.TRAIN.CLS_WEIGHT * cls_loss
+            outputs = self.criterion(output, (label_cls, label_loc))
             return outputs
         else:
             label_loc_weight = data['label_loc_weight'].cuda()

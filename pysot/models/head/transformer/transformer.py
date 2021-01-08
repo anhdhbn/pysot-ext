@@ -47,14 +47,7 @@ class Transformer(nn.Module):
         memory = self.encoder(src, srcKeyPaddingMask=mask, pos=pos)
         
         out = self.decoder(tgt, memory, memoryKeyPaddingMask=mask, pos=pos, queryPos=query).transpose(0, 2)
-        # torch.Size([8, 10, 6, 256])
-        # num_query = out.shape[1]
-        # out = out.reshape((N, num_query, -1))
-        # print(out.shape, num_query)
-        # out = torch.mean(out, dim=2) # torch.Size([8, 10, 256])
-        # print(out.shape)
         out = out.reshape((N, -1, self.hiddenDims)) # torch.Size([8, 60, 256])
-        # out = torch.mean(out, dim=1)
         return out
 
 
