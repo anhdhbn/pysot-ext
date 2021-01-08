@@ -46,7 +46,11 @@ TRAIN:
     LOC_WEIGHT: 1.2
     RESUME: ''
     TEST_IMMEDIATELY: true
+    CLS_WEIGHT: 1.0
+    LOC_WEIGHT: 1.2
+    IOU_WEIGHT: 1.3
     # SNAPSHOT_DIR: './snapshot'
+    # TEST_SNAPSHOT_DIR: './test/snapshot'
 
     LR:
         TYPE: 'log'
