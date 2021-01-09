@@ -10,7 +10,7 @@ import random
 
 def test_snapshot(epoch:int, snapshot:str, test_path:str):
     # model
-    max_img = 4
+    max_img = 8
     model = ModelBuilder()
     data = torch.load(snapshot,
         map_location=lambda storage, loc: storage.cpu())
