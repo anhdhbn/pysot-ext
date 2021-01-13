@@ -101,7 +101,7 @@ def test_snapshot(epoch:int, snapshot:str, test_path:str):
         z = cv2.imread(zs[i])
         x_path, bbox = xs[i]
         x = cv2.imread(x_path)
-        tracker.init(z)
+        tracker.init_(z)
         cls, (x1, y1, x2, y2) = tracker.track(x)
         cv2.rectangle(x, (x1, y1), (x2, y2), (255,0,0), 2)
         a1, b1, a2, b2 = bbox

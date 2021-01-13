@@ -45,6 +45,7 @@ class ModelBuilder(nn.Module):
 
     def template(self, z):
         if cfg.TRANSFORMER.TRANSFORMER:
+            z = z.cuda()
             zf = self.backbone(z)
             if cfg.ADJUST.ADJUST:
                 zf = self.neck(zf)
@@ -59,6 +60,7 @@ class ModelBuilder(nn.Module):
 
     def track(self, x):
         if cfg.TRANSFORMER.TRANSFORMER:
+            x = x.cuda()
             xf = self.backbone(x)
             if cfg.ADJUST.ADJUST:
                 xf = self.neck(xf)

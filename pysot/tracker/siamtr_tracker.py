@@ -25,7 +25,7 @@ class SiamTrTracker(SiameseTracker):
         img = torch.from_numpy(img)
         return img
 
-    def init(self, img):
+    def init_(self, img):
         """
         args:
             img(np.ndarray): BGR image
@@ -33,6 +33,11 @@ class SiamTrTracker(SiameseTracker):
         # get crop
         z_crop = self.transform(img)
         self.model.template(z_crop)
+    
+    def init(self, img, roi):
+        (x, y, w, h) = roi
+        z_crop = img[int(y):int(y+h), int(x):int(x+w)]
+        self.init_(z_crop)
 
     def track(self, img):
         shape = img.shape[:2]
