@@ -66,7 +66,13 @@ def load_pretrain(model, pretrained_path):
             new_dict[k] = v
         pretrained_dict = new_dict
         check_keys(model, pretrained_dict)
-    model.load_state_dict(pretrained_dict, strict=False)
+        
+    try:
+        model.load_state_dict(pretrained_dict, strict=False)
+    except:
+        pretrained_dict.pop("layer4.0.conv1.weight")
+        pretrained_dict.pop("layer4.0.downsample.0.weight")
+        model.load_state_dict(pretrained_dict, strict=False)
     return model
 
 
