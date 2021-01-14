@@ -45,7 +45,7 @@ class ModelBuilder(nn.Module):
 
     def template(self, z):
         if cfg.TRANSFORMER.TRANSFORMER:
-            zf = self.backbone(z)
+            zf = self.backbone(z)[-1]
             if cfg.ADJUST.ADJUST:
                 zf = self.neck(zf)
             self.zf = zf
@@ -59,7 +59,7 @@ class ModelBuilder(nn.Module):
 
     def track(self, x):
         if cfg.TRANSFORMER.TRANSFORMER:
-            xf = self.backbone(x)
+            xf = self.backbone(x)[-1]
             if cfg.ADJUST.ADJUST:
                 xf = self.neck(xf)
             cls, loc = self.tr_head(self.zf, xf)
@@ -113,6 +113,8 @@ class ModelBuilder(nn.Module):
         xf = self.backbone(search)
         
         if cfg.TRANSFORMER.TRANSFORMER:
+            zf = zf[-1]
+            xf = xf[-1]
             if cfg.ADJUST.ADJUST:
                 zf = self.neck(zf)
                 xf = self.neck(xf)
