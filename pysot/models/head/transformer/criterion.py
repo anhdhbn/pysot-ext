@@ -42,12 +42,15 @@ class SiamTrCriterion(nn.Module):
         # giou_loss = giou_loss.sum() / (N + 1e-6)
 
         # iou loss
-        iou_loss = torch.mean(1 - boxIoU_batch(loc, label_loc))
+        iou = boxIoU_batch(loc, label_loc)
+        iou = 1 - iou
+        iou_loss = torch.mean(iou)
 
         outputs['loc_loss'] = loc_loss
         outputs['cls_loss'] = cls_loss
         # outputs['giou_loss'] = giou_loss
         outputs['iou_loss'] = iou_loss
+        outputs['iou_var'] = torch.std(iou)
         # outputs['total_loss'] = self.cls_weight * cls_loss + self.loc_weight * loc_loss + self.giou_weight * giou_loss
         outputs['total_loss'] = self.cls_weight * cls_loss + self.loc_weight * loc_loss + self.giou_weight * iou_loss
         return outputs
