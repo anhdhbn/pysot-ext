@@ -2,7 +2,7 @@ from typing import Dict, List, Tuple
 
 import torch
 from torch import nn, Tensor
-from pysot.models.head.transformer.boxOps import boxCxcywh2Xyxy, gIoU, boxIoU
+from pysot.models.head.transformer.boxOps import boxCxcywh2Xyxy, gIoU, boxIoU, boxIoU_batch
 import torch.nn.functional as F
 
 class SiamTrCriterion(nn.Module):
@@ -38,11 +38,16 @@ class SiamTrCriterion(nn.Module):
         loc_loss = F.mse_loss(loc[mask], label_loc[mask])
 
         # giou loss
-        giou_loss = 1 - torch.diag(gIoU(loc, label_loc))
-        giou_loss = giou_loss.sum() / (N + 1e-6)
+        # giou_loss = 1 - torch.diag(gIoU(loc, label_loc))
+        # giou_loss = giou_loss.sum() / (N + 1e-6)
+
+        # iou loss
+        iou_loss = torch.mean(1 - boxIoU_batch(loc, label_loc))
 
         outputs['loc_loss'] = loc_loss
         outputs['cls_loss'] = cls_loss
-        outputs['giou_loss'] = giou_loss
-        outputs['total_loss'] = self.cls_weight * cls_loss + self.loc_weight * loc_loss + self.giou_weight * giou_loss
+        # outputs['giou_loss'] = giou_loss
+        outputs['iou_loss'] = iou_loss
+        # outputs['total_loss'] = self.cls_weight * cls_loss + self.loc_weight * loc_loss + self.giou_weight * giou_loss
+        outputs['total_loss'] = self.cls_weight * cls_loss + self.loc_weight * loc_loss + self.giou_weight * iou_loss
         return outputs
