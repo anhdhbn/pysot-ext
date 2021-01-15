@@ -33,16 +33,17 @@ class SiamTrCriterion(nn.Module):
         # ignore negative labels
         mask = label_cls != torch.tensor([0], dtype=torch.float).cuda()
         mask = torch.cat((mask, mask, mask, mask), 1)
-
+        loc_mask = loc[mask].view(-1, 4)
+        label_loc_mask = label_loc[mask].view(-1, 4)
         # loc loss
-        loc_loss = F.mse_loss(loc[mask], label_loc[mask])
-        
+        loc_loss = F.mse_loss(loc_mask, label_loc_mask)
+
         # giou loss
         # giou_loss = 1 - torch.diag(gIoU(loc, label_loc))
         # giou_loss = giou_loss.sum() / (N + 1e-6)
 
         # iou loss
-        iou = boxIoU_batch(loc[mask], label_loc[mask])
+        iou = boxIoU_batch(loc_mask, label_loc_mask)
         iou_loss = torch.mean(1 - iou)
 
         outputs['loc_loss'] = loc_loss
