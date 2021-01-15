@@ -17,7 +17,7 @@ class SiamTrCriterion(nn.Module):
     def forward(self, x: Tuple[Tensor, Tensor], y: Tuple[str, Tensor]) -> Dict[str, Tensor]:
         """
         :param x and y: a tuple containing:
-            a tensor of shape [batchSize , 2]
+            a tensor of shape [batchSize , 1]
             a tensor of shape [batchSize , 4]
 
         :return: a dictionary containing classification loss, bbox loss, and gIoU loss
@@ -29,22 +29,21 @@ class SiamTrCriterion(nn.Module):
 
         # class loss
         cls_loss = self.tr_cls_loss(cls, label_cls)
-
+        
         # ignore negative labels
-        mask = label_cls != torch.tensor([0, 1], dtype=torch.float).cuda()
-        mask = torch.cat((mask, mask), 1)
+        mask = label_cls != torch.tensor([0], dtype=torch.float).cuda()
+        mask = torch.cat((mask, mask, mask, mask), 1)
 
         # loc loss
         loc_loss = F.mse_loss(loc[mask], label_loc[mask])
-
+        
         # giou loss
         # giou_loss = 1 - torch.diag(gIoU(loc, label_loc))
         # giou_loss = giou_loss.sum() / (N + 1e-6)
 
         # iou loss
-        iou = boxIoU_batch(loc, label_loc)
-        iou = 1 - iou
-        iou_loss = torch.mean(iou)
+        iou = boxIoU_batch(loc[mask], label_loc[mask])
+        iou_loss = torch.mean(1 - iou)
 
         outputs['loc_loss'] = loc_loss
         outputs['cls_loss'] = cls_loss

@@ -95,18 +95,12 @@ class AnchorTarget:
         return cls, delta, delta_weight, overlap
 
 class TransformerTarget:
-    def __init__(self,):
-        self.anchors = Anchors(cfg.ANCHOR.STRIDE,
-                               cfg.ANCHOR.RATIOS,
-                               cfg.ANCHOR.SCALES)
-        self.anchors.generate_all_anchors(im_c=cfg.TRAIN.SEARCH_SIZE//2,
-                                          size=cfg.TRAIN.OUTPUT_SIZE)
     def __call__(self, target, shape, neg=False):
         # -1 ignore 0 negative 1 positive
-        cls = np.array([1, 0], dtype=np.float)
+        cls = np.array([1], dtype=np.float)
         delta = np.zeros((4), dtype=np.float32)  
         if neg:
-            cls = np.array([0, 1], dtype=np.float)
+            cls = np.array([0], dtype=np.float)
             return cls, delta
         
         h, w = shape

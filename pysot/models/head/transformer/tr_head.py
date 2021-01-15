@@ -43,7 +43,7 @@ class SiamTr(nn.Module):
                                        dim_feed_forward, dropout)
 
         self.query_embed = nn.Embedding(num_query, hidden_dims)
-        self.class_embed = nn.Linear(num_decoder_layer * num_decoder_layer * hidden_dims, 2)
+        self.class_embed = nn.Linear(num_decoder_layer * num_decoder_layer * hidden_dims, 1)
         self.bbox_embed = nn.Linear(num_decoder_layer * num_decoder_layer * hidden_dims, 4)
         # self.bbox_embed = MLP(hidden_dims, hidden_dims, 4, 3)
 
@@ -63,6 +63,6 @@ class SiamTr(nn.Module):
         N = out.shape[0]
         out = out.view((N, -1))
 
-        outputs_class = self.class_embed(out).sigmoid() # [batchSize , 2]
+        outputs_class = self.class_embed(out).sigmoid() # [batchSize , 1]
         outputs_coord = self.bbox_embed(out).sigmoid()  # [batchSize , 4]
         return outputs_class, outputs_coord
