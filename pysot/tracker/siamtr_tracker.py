@@ -32,6 +32,8 @@ class SiamTrTracker(SiameseTracker):
         """
         # get crop
         z_crop = self.transform(img)
+        if cfg.CUDA:
+            z_crop = z_crop.cuda()
         self.model.template(z_crop)
     
     def init(self, img, roi):
@@ -42,6 +44,8 @@ class SiamTrTracker(SiameseTracker):
     def track(self, img):
         shape = img.shape[:2]
         x_crop = self.transform(img)
+        if cfg.CUDA:
+            x_crop = x_crop.cuda()
         output = self.model.track(x_crop)
 
         cls = self._convert_score(output['cls'])[0]
