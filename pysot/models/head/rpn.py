@@ -77,7 +77,7 @@ class DepthwiseXCorr(nn.Module):
         search = self.conv_search(search)
         feature = xcorr_depthwise(search, kernel)
         out = self.head(feature)
-        return out
+        return out, feature
 
 
 class DepthwiseRPN(RPN):
@@ -87,9 +87,9 @@ class DepthwiseRPN(RPN):
         self.loc = DepthwiseXCorr(in_channels, out_channels, 4 * anchor_num)
 
     def forward(self, z_f, x_f):
-        cls = self.cls(z_f, x_f)
-        loc = self.loc(z_f, x_f)
-        return cls, loc
+        cls, cross_cls = self.cls(z_f, x_f)
+        loc, cross_loc = self.loc(z_f, x_f)
+        return cls, loc, cross_cls, cross_loc
 
 
 class MultiRPN(RPN):
@@ -108,7 +108,7 @@ class MultiRPN(RPN):
         loc = []
         for idx, (z_f, x_f) in enumerate(zip(z_fs, x_fs), start=2):
             rpn = getattr(self, 'rpn'+str(idx))
-            c, l = rpn(z_f, x_f)
+            c, l, cross_c, cross_l = rpn(z_f, x_f)
             cls.append(c)
             loc.append(l)
 
