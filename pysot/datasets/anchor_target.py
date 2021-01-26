@@ -114,5 +114,7 @@ class TransformerTarget:
         x2 = float(x2) / w
         y2 = float(y2) / h
 
-        delta = np.array([x1, y1, x2, y2], dtype=np.float32)
+        # delta = np.array([x1, y1, x2, y2], dtype=np.float32)
+        tcx, tcy, tw, th = corner2center(target)
+        delta = np.array([tcx/w, tcy/h, tw/w, th/h], dtype=np.float32)
         return cls, delta
