@@ -46,9 +46,9 @@ class Transformer(nn.Module):
 
         memory = self.encoder(src, srcKeyPaddingMask=mask, pos=pos)
         
-        out = self.decoder(tgt, memory, memoryKeyPaddingMask=mask, pos=pos, queryPos=query).transpose(0, 2)
-        out = out.reshape((N, -1, self.hiddenDims)) # torch.Size([8, 60, 256])
-        return out
+        out = self.decoder(tgt, memory, memoryKeyPaddingMask=mask, pos=pos, queryPos=query)
+        # out = out.reshape((N, -1, self.hiddenDims)) # torch.Size([8, 60, 256])
+        return out.transpose(1, 2)
 
 
 class TransformerEncoder(nn.Module):

@@ -43,8 +43,8 @@ class SiamTr(nn.Module):
                                        dim_feed_forward, dropout)
 
         self.query_embed = nn.Embedding(num_query, hidden_dims)
-        self.class_embed = nn.Linear(num_decoder_layer * num_decoder_layer * hidden_dims, 1)
-        self.bbox_embed = nn.Linear(num_decoder_layer * num_decoder_layer * hidden_dims, 4)
+        self.class_embed = nn.Linear(num_query * hidden_dims, 1)
+        self.bbox_embed = nn.Linear( num_query * hidden_dims, 4)
         # self.bbox_embed = MLP(hidden_dims, hidden_dims, 4, 3)
 
     def forward(self, template: Tensor, search: Tensor) -> Tuple[Tensor, Tensor]:
@@ -57,12 +57,11 @@ class SiamTr(nn.Module):
         """
         features, (pos, mask) = self.extractor(template, search)
 
-        out = self.transformer(features, mask, self.query_embed.weight, pos)
+        out = self.transformer(features, mask, self.query_embed.weight, pos)[-1]
 
-        # convert out [batchSize, numQuery * numDecoderLayer, hiddenDims] => [batchSize, numQuery * numDecoderLayer * hiddenDims]
-        N = out.shape[0]
-        out = out.view((N, -1))
-
+        # convert out [batchSize, numQuery , hiddenDims] => [batchSize, numQuery * numDecoderLayer * hiddenDims]
+        out = out.flatten(1)
+       
         outputs_class = self.class_embed(out).sigmoid() # [batchSize , 1]
         outputs_coord = self.bbox_embed(out).sigmoid()  # [batchSize , 4]
         return outputs_class, outputs_coord
